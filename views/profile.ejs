@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+</head>
+<body>
+    <div class="container">
+        <% if(locals.user) { %>
+        <div>
+            <p id="coins">💎 <%= user.coins %></p>
+            <p>name: <%= user.name %></p>
+            <p>email: <%= user.email %></p> 
+            <% if (user.id === viewer.id) { %>
+            <p>Phone No: <%= user.phone_num %></p>
+            <% } else {%>
+            <p>Phone No: Private</p>
+            <% } %>
+        </div>
+        <div>
+            <% if (user.id !== viewer.id) { %>
+            <p><a href="/transfer_page/<%= user.id %>">Transfer to <%= user.name %></a></p>
+            <% } else { %>
+                <p>You cannot transfer to yourself</p>
+            <% } %>
+            
+        </div>
+        <a href="/dashboard">dashboard</a>
+        <% } %>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <%- include('partials/footer.ejs') %>
+</body>
+</html>

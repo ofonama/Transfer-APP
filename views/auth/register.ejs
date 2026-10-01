@@ -1,0 +1,16 @@
+<%- include('auth_partials/header.ejs') %>
+<main>
+  <h1>Register</h1>
+  <form action="/register" method="post">
+    <% if(locals.e) { %>
+    <span class="err-msg"><%= e %></span><br />
+    <% } %>
+    <input type="text" name="name" placeholder="Name" />
+    <input type="email" name="email" placeholder="Email" />
+    <input type="password" name="password" placeholder="Password" />
+    <input type="number" name="phone_num" placeholder="Phone Number" />
+    <button type="submit">Submit</button>
+    <a href="/login">Login</a>
+  </form>
+</main>
+<%- include('auth_partials/footer.ejs') %>

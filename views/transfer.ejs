@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transfer</title>
+  </head>
+  <body>
+    <div class="container">
+        <% if(locals.sender && locals.receiver) { %>
+        <small id="coins">💎 <%= sender.coins %></small>
+        <h2>You are Transferring to <%= receiver.name %></h1>
+            <span id="err-msg2"></span>
+            <form action="/transfer/<%= receiver.id %>" method="post">
+                <input type="number" id="transferAmount" min="1" name="amount" placeholder="Amount" required>
+                <input type="text" id="reason" name="reason" placeholder="Your reason" required />
+                <button id="transferBtn" type="button">Transfer</button>
+                <a href="/dashboard">Dashboard</a>
+            </form>
+
+            <div id="transfer-details"></div>
+        <% } %>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <%- include('partials/footer.ejs') %>
+    <script>
+        const btn_transfer = document.getElementById("transferBtn");
+        const err_msg_div2 = document.getElementById("err-msg2");
+        const coins = document.getElementById("coins");
+        const td = document.getElementById("transfer-details");
+        // Transfer Functionality
+        async function transfer(transferAmount, reason) {
+            try {
+            const response = await fetch(
+                "/transfer/<%= locals.receiver ? receiver.id : '' %>",
+                {
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    transferAmount: transferAmount,
+                    reason: reason,
+                }),
+                },
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.error !== null) {
+                err_msg_div2.innerHTML = data.error;
+                } else {
+                err_msg_div2.innerHTML = "";
+
+                coins.innerHTML = `💎 ${data.senderCoins}`;
+
+                td.innerHTML = `
+                    <p>Transfer successful!</p>
+                    <p>Transaction status: ${data.transactionStatus === true ? "Successful" : "We had an Issue"}</p>
+                    <p>Sender: ${data.senderName}</p>
+                    <p>Amount: 💎 ${data.amount}</p>
+                    <p>Narration: ${data.reason}</p>
+                    <p>Receiver: ${data.receiverName}</p>
+                    <P>Type: ${data.type}</p>`;
+                }
+            }
+            } catch (e) {
+            console.log("error: ", e);
+            }
+        }
+
+        btn_transfer.addEventListener("click", () => {
+            transfer(
+            document.getElementById("transferAmount").value,
+            document.getElementById("reason").value,
+            );
+
+            document.getElementById("transferAmount").value = "";
+            document.getElementById("reason").value = "";
+        });
+    </script>
+  </body>
+</html>

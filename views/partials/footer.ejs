@@ -1,0 +1,71 @@
+<script>
+  const socket = io();
+  //   socket.emit(
+  //     "register",
+  //     "<%# locals.user || locals.sender ? (locals.user ? user.id : sender.id) : '' %>",
+  //   );
+  socket.emit(
+    "register",
+    "<%= locals.user || (locals.sender && locals.receiver) ? (locals.user ? user.id : sender.id) : '' %>",
+  );
+
+  const users_div = document.querySelector(".users_div");
+  const btn_search = document.getElementById("searchbtn");
+  const err_msg_div = document.getElementById("err-msg");
+
+  // Search Functionality: Server
+  async function search(input) {
+    try {
+      const response = await fetch("/search", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          search_req: input,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        if (response.ok && data.users.length === 0) {
+          users_div.innerHTML = "";
+          err_msg_div.innerHTML = "No users found";
+        } else {
+          err_msg_div.innerHTML = "";
+          users_div.innerHTML = data.users
+            .map((user) => `<a href="/profile/${user.id}">${user.name}</a>`)
+            .join("<br />");
+        }
+      }
+      console.log(data.users);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+  // Transfer Alert
+  socket.on("transferReceived", (data) => {
+    const coins = document.getElementById("coins");
+
+    if (coins) {
+      coins.textContent = `💎 ${data.receiverCoins}`;
+    }
+
+    alert(`${data.senderName} sent you 💎${data.amount}`);
+  });
+
+  // Search Function: Client
+  document.getElementById("search").addEventListener("input", () => {
+    const search_input = document.getElementById("search").value;
+
+    search(search_input);
+  });
+
+  // Btn click Function
+  btn_search.addEventListener("click", (e) => {
+    e.preventDefault();
+    const search_input = document.getElementById("search").value;
+    search(search_input);
+  });
+</script>
